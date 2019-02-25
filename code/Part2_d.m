@@ -1,24 +1,24 @@
 
-%% Part 2 b)
-% We want to increase the mesh sizes and see how the current changes with
-% respect to it.
+%% Part 2 d)
+%
+% We want to increase the sigma value and see how the current changes with
+% respect to it
 
-clear
-clc
-for mSize = 10:10:100
+
+for s = 0.01:0.01:0.9
     
-    nx = 100;
-    ny = 1.5 * mSize; % Since we want the region to be a rectangle and ratio is 3/2
+    nx = 50;
+    ny = 1.5 * nx; % Since we want the region to be a rectangle and ratio is 3/2
     
-    G = sparse(mSize*ny); % the equations
-    B = zeros(1,mSize*ny);
+    G = sparse(nx*ny); % the equations
+    B = zeros(1,nx*ny);
     
-    sM = zeros (ny,mSize); % sigma matrix
+    sM = zeros (ny,nx); % sigma matrix
     
-    %the two contacts
-    box = [mSize*2/5 mSize*3/5 ny*2/5 ny*3/5];
+    %the two contacts will become smaller with each iteration
+    box = [nx*2/5 nx*3/5 ny*2/5 ny*3/5];
     
-    for i = 1:mSize
+    for i = 1:nx
         
         for j = 1:ny
             
@@ -29,7 +29,7 @@ for mSize = 10:10:100
                 G(n, n) = 1;
                 B(n) = 1;
                 
-            elseif i == mSize
+            elseif i == nx
                 G(n, :) = 0;
                 G(n, n) = 1;
                 B(n) = 0;
@@ -38,9 +38,9 @@ for mSize = 10:10:100
                 
                 if i > box(1) && i < box(2)
                     G(n, n) = -3;
-                    G(n, n+1) = 0.01;
-                    G(n, n+ny) = 0.01;
-                    G(n, n-ny) = 0.01;
+                    G(n, n+1) = s;
+                    G(n, n+ny) = s;
+                    G(n, n-ny) = s;
                     
                 else
                     
@@ -56,9 +56,9 @@ for mSize = 10:10:100
                 if i > box(1) && i < box(2)
                     
                     G(n, n) = -3;
-                    G(n, n+1) = 0.01;
-                    G(n, n+ny) = 0.01;
-                    G(n, n-ny) = 0.01;
+                    G(n, n+1) = s;
+                    G(n, n+ny) = s;
+                    G(n, n-ny) = s;
                     
                 else
                     
@@ -74,10 +74,10 @@ for mSize = 10:10:100
                 if i > box(1) && i < box(2) && (j < box(3)||j > box(4))
                     
                     G(n, n) = -4;
-                    G(n, n+1) = 0.01;
-                    G(n, n-1) = 0.01;
-                    G(n, n+ny) = 0.01;
-                    G(n, n-ny) = 0.01;
+                    G(n, n+1) = s;
+                    G(n, n-1) = s;
+                    G(n, n+ny) = s;
+                    G(n, n-ny) = s;
                     
                 else
                     
@@ -92,12 +92,12 @@ for mSize = 10:10:100
         end
     end
     
-    for i = 1 : mSize
+    for i = 1 : nx
         
         for j = 1 : ny
             
             if i >= box(1) && i <= box(2)
-                sM(j, i) = 0.01;
+                sM(j, i) = s;
                 
             else
                 
@@ -116,9 +116,9 @@ for mSize = 10:10:100
     
     V = G\B';
     
-    m = zeros(ny,mSize,1);
+    m = zeros(ny,nx,1);
     
-    for i = 1:mSize
+    for i = 1:nx
         
         for j = 1:ny
             
@@ -135,31 +135,26 @@ for mSize = 10:10:100
     
     J = sqrt(Jx.^2 + Jy.^2);
     
-    figure(1)
-    hold on
+    figure(1);
+    hold on;
     
-    if mSize == 10
-        
+    if s == 0.01
         curr = sum(J, 2);
         currSum = sum(curr);
         currTemp = currSum;
-        plot([mSize, mSize], [currTemp, currSum])
-        
+        plot([s, s], [currTemp, currSum])
     end
-    if mSize > 10
-        
+    if s > 0.01
         currTemp = currSum;
         curr = sum(J, 2);
         currSum = sum(curr);
-        plot([mSize-10, mSize], [currTemp, currSum])
-        xlabel("Mesh Size")
-        ylabel("Current Density")
-        
+        plot([s-0.01, s], [currTemp, currSum])
+        xlabel("Sigma");
+        ylabel("Current Density");
     end
-    
-    title("Mesh Size vs Current Density")
+    title("Sigma vs Current Density");
     
 end
-
 %% Conclusion
-% From the plot, it is concluded that the mesh size is proportional to the current density
+% Naturally, when the sigma value increases, the current density increases
+% since it is directly proportional
